@@ -1,0 +1,215 @@
+USE IronSide;
+GO
+
+--TABLAS
+--Evaluar Tabla album
+IF OBJECT_ID ('Album') IS NOT NULL
+  BEGIN 
+      DROP TABLE Album
+  END
+GO
+--Evaluar si existe cancion
+IF OBJECT_ID ('Cancion') IS NOT NULL
+  BEGIN 
+      DROP TABLE Cancion
+  END
+GO
+
+--Evaluar existencia de cantante
+IF OBJECT_ID ('Cantante') IS NOT NULL
+  BEGIN 
+      DROP TABLE Cantante
+  END
+GO
+
+--Evaluar la tabla Disquera
+IF OBJECT_ID ('Disquera') IS NOT NULL
+  BEGIN 
+      DROP TABLE Disquera
+  END
+GO
+
+--crear la tabla cantante
+CREATE TABLE Cantante (
+CodCantante INT PRIMARY KEY IDENTITY(1,1),
+Nombre VARCHAR(100),
+Pais VARCHAR(150)
+);
+GO
+
+--Crear disquera
+CREATE TABLE Disquera (
+CodDisquera VARCHAR(4) PRIMARY KEY,
+Nombre VARCHAR(60)
+);
+GO
+
+--Crear cancion
+CREATE TABLE Cancion (
+CodDisquera VARCHAR(4),
+CodCantante INT,
+CodCancion VARCHAR(4) PRIMARY KEY,
+Titulo VARCHAR(50),
+Fecha DATE,
+DuracionSeg INT,
+CONSTRAINT FK_Cantante FOREIGN KEY (CodCantante) REFERENCES Cantante(CodCantante),
+CONSTRAINT FK_Disquera FOREIGN KEY (CodDisquera) REFERENCES Disquera(CodDisquera)
+);
+GO
+
+--crear tabla album
+CREATE TABLE Album (
+IdAlbum INT PRIMARY KEY IDENTITY(1,1),
+Titulo VARCHAR (50),
+CodCancion VARCHAR(4),
+CONSTRAINT FK_Cancion FOREIGN KEY (CodCancion) REFERENCES Cancion(CodCancion),
+);
+GO
+
+IF OBJECT_ID ('Album_Resp') IS NOT NULL
+  BEGIN 
+      DROP TABLE Album_Resp
+  END
+GO
+
+CREATE TABLE Album_Resp(
+IdAlbum INT PRIMARY KEY,
+CodCancion VARCHAR(4),
+Titulo VARCHAR (50)
+);
+Go
+
+
+--Triggers
+--Evaluar trigger para Cantante
+IF OBJECT_ID ('T_Cantante') IS NOT NULL
+  BEGIN
+      DROP TRIGGER T_Cantante
+  END
+GO
+
+--trigger cantante
+CREATE TRIGGER T_Cantante
+ON Cantante
+AFTER DElETE 
+AS
+  BEGIN
+	PRINT 'El registro de cantante se elimino'
+	END
+GO
+
+--evaluar trigger disquera
+IF OBJECT_ID ('T_Disquera') IS NOT NULL
+  BEGIN
+      DROP TRIGGER T_Disquera
+  END
+GO
+
+--trigger Disquera
+CREATE TRIGGER T_Disquera
+ON Disquera
+AFTER DElETE 
+AS
+  BEGIN
+	PRINT 'El registro de la disquera se elimino'
+	END
+GO
+
+--evaluar trigger cancion
+IF OBJECT_ID ('T_Cancion') IS NOT NULL
+  BEGIN
+      DROP TRIGGER T_Cancion
+  END
+GO
+
+--trigger Cancion
+CREATE TRIGGER T_Cancion
+ON Cancion
+AFTER INSERT
+AS
+  BEGIN
+	IF (SELECT DuracionSeg FROM inserted) >240
+	  BEGIN
+		PRINT 'Se inserto una cancion larga'
+	  END
+	ELSE
+	  BEGIN 
+		PRINT 'Se inserto una cancion corta'
+	  END
+	END
+GO
+
+--Evaluar trigger Album
+IF OBJECT_ID ('T_Album') IS NOT NULL
+  BEGIN
+      DROP TRIGGER T_Album
+  END
+GO
+
+--Trigger Album
+CREATE TRIGGER T_Album
+ON Album
+AFTER INSERT
+AS
+  BEGIN
+	INSERT Album_Resp SELECT * FROM inserted
+	END
+GO
+
+--INSERCIONES
+--TABLA CANTANTE
+INSERT INTO Cantante VALUES('Epica','Holanda')
+GO
+INSERT INTO Cantante VALUES('Xandria','Alemania')
+GO
+INSERT INTO Cantante VALUES('Rammstein','Alemania')
+GO
+
+--Tabla Disquera
+INSERT INTO Disquera VALUES('NBTR','Nuclear Blast')
+GO
+INSERT INTO Disquera VALUES('UMGR','Universal Music group')
+GO
+INSERT INTO Disquera VALUES('NARE','Napalm Records')
+GO
+
+--Tabla cancion
+INSERT INTO Cancion VALUES('NBTR',1,'SATE','Sancta Terra','2007-08-27',255)
+GO
+INSERT INTO Cancion VALUES('NBTR',1,'CFTM','Cry for the moon','2003-07-14',530)
+GO
+INSERT INTO Cancion VALUES('NARE',3,'AMER','Amerika','2004-09-13',200)
+GO
+INSERT INTO Cancion VALUES('NARE',3,'METE','Mein teil','2004-07-26',243)
+GO
+
+--Tabla album
+INSERT INTO Album VALUES(1,'SATE','Consing to oblivion')
+GO
+INSERT INTO Album VALUES(2,'CFTM','Reise Reise')
+GO
+
+--consultas
+DELETE  FROM Cantante
+WHERE Nombre = 'Xandria'
+GO
+
+DELETE  FROM Disquera
+WHERE Nombre = 'Napalm Records'
+GO
+
+SELECT * FROM Cantante
+GO
+
+SELECT * FROM Disquera
+GO
+
+SELECT * FROM Cancion
+GO
+
+SELECT * FROM Album
+GO
+
+SELECT * FROM Album_Resp
+GO
+
