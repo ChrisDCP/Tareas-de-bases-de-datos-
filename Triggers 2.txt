@@ -1,0 +1,71 @@
+USE SEMIHUMANAS;
+GO
+
+IF OBJECT_ID('PERSONA') IS NOT NULL
+  BEGIN
+    DROP TABLE PERSONA
+  END
+GO
+
+CREATE TABLE PERSONA (
+Nombre VARCHAR (20),
+FechaNacimiento DATE,
+Edad int,
+Correo VARCHAR (35),
+GENERO CHAR(1)
+);
+GO
+
+IF OBJECT_ID ('E_PERSONA') IS NOT NULL
+  BEGIN
+      DROP TRIGGER E_PERSONA
+  END
+GO
+
+CREATE TRIGGER E_PERSONA
+ON PERSONA
+AFTER INSERT
+AS
+  BEGIN
+    IF (SELECT Edad FROM inserted) <18
+	  BEGIN
+	    ROLLBACK TRANSACTION
+		PRINT 'La edad no puede ser menor a 18'
+	  END
+	ELSE
+	  BEGIN
+	    PRINT 'Insercion correcta'
+	  END
+	END
+GO
+
+INSERT INTO PERSONA VALUES ('Historia','0830-01-15',15,'Hreissqueen@gmail.com','F')
+GO
+
+INSERT INTO PERSONA VALUES ('Alice','0200-04-09',19,'AliSchuberg30@gmail.com','F')
+GO
+
+SELECT * FROM PERSONA
+GO
+
+IF OBJECT_ID ('D_Elminado') IS NOT NULL
+  BEGIN
+      DROP TRIGGER D_Elminado
+  END
+GO
+
+CREATE TRIGGER D_Elminado
+ON PERSONA
+AFTER DELETE
+AS
+  BEGIN
+    PRINT 'El registro se elimino'
+  End
+GO
+
+DELETE FROM PERSONA
+WHERE Nombre ='Alice'
+GO
+
+SELECT * FROM PERSONA
+GO
